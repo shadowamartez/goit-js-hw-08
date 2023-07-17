@@ -7,29 +7,31 @@ formFeedback.addEventListener("submit", submitFormInfo);
 
 const LOCAL_KEY = "feedback-form-state"; 
 
-let formInfo = JSON.parse(localStorage.getItem(LOCAL_KEY)) || {}; 
-const { email, message } = formFeedback.elements;
-reloadPage();
+let formInfo = {};
 
 function inputInfo(evt) {
-    dataForm = { email: email.value, message: message.value };
+    formInfo[evt.target.name] = evt.target.value.trim();
     localStorage.setItem(LOCAL_KEY, JSON.stringify(formInfo));
 }
 
-function reloadPage(evt) {
-    if (formInfo) {
-        email.value = formInfo.email || '';
-        message.value = formInfo.message || '';
+const onLoad = () => {
+    try {
+        const data = localStorage.getItem(LOCAL_KEY);
+        if (!data) return;
+        formInfo = JSON.parse(data);
+        Object.entries(formInfo).forEach(([key, val]) => {
+            formFeedback.elements[key].value = val;
+        });
+    } catch (error) {
+        console.log(error.message);
     }
-}
+};
+
+window.addEventListener("load", onLoad); 
 
 function submitFormInfo(evt) {
     evt.preventDefault();
-    console.log({ email: email.value, message: message.value })
-    
-    if (email.value === '' || message.value === '') {
-        return alert('Please fill in all the fields!'); 
-    }
+    console.log(formInfo); 
 
     localStorage.removeItem(LOCAL_KEY);
     evt.currentTarget.reset();
